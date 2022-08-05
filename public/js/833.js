@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[833],{8833:(e,s,t)=>{t.r(s),t.d(s,{default:()=>n});const l={};const n=(0,t(1900).Z)(l,(function(){var e=this.$createElement;return(this._self._c||e)("div",{staticClass:"page-wrapper"})}),[],!1,null,null,null).exports}}]);

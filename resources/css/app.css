@@ -1,0 +1,7 @@
+/* import 'bootstrap' */
+@import 'bootstrap';
+
+.page-wrapper {
+    animation-duration: 0.2s;
+    animation-delay: 0.2s;
+}

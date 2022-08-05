@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[540],{8938:(e,t,s)=>{s.r(t),s.d(t,{default:()=>c});const n={};const c=(0,s(1900).Z)(n,(function(){var e=this,t=e.$createElement,s=e._self._c||t;return s("div",{staticClass:"px-0 page-wrapper"},[s("nav-section"),e._v(" "),s("section"),e._v(" "),s("footer-section")],1)}),[],!1,null,"96e236c8",null).exports}}]);

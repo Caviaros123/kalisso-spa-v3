@@ -5,6 +5,8 @@
 /public/_temp
 /public/example
 /public/vendor
+/public/mca-acep
+/public/images
 /storage/*.key
 /vendor
 .env

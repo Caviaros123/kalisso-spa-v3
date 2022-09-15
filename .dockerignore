@@ -1,0 +1,10 @@
+node_modules
+/public/build
+/public/hot
+/public/storage
+/public/_temp
+/public/example
+/public/vendor
+/public/mca-acep
+/public/images
+vendor

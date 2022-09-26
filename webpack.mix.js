@@ -11,7 +11,7 @@ const mix = require('laravel-mix');
  |
  */
  
- mix.setPublicPath('../public_html')
+ mix.setPublicPath('../')
  
  mix.js('resources/js/app.js', 'js')
  .vue()

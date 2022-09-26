@@ -32,16 +32,14 @@ Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
 
-Route::any('/{vue_capture}', function () {
-    return view('layouts.app');
-})->where('vue_capture', '(?!api).*$')
-->where('vue_capture', '^(?!admin).*$')
-->where('vue_capture', '^(?!broadcasting).*$')
-->where('vue_capture', '^(?!laravel-websockets).*$')
-->where('vue_capture', '^(?!tasks/members).*$')
-->where('vue_capture', '^(?!tasks/products).*$')
-->where('vue_capture', '^(?!payment/callback).*$')
-->where('vue_capture', '^(?!notify).*$');
+Route::post('resend/verification-email', function (\Illuminate\Http\Request $request) {
+    $user = User::where('email',$request->input('email'))->first();
+
+    $user->sendEmailVerificationNotification();
+
+    return;
+})->middleware('throttle:6,1')->name('resend.email.verify');
+
 
 Route::group(['prefix' => 'broadcasting'], function () {
     Broadcast::routes();
@@ -54,6 +52,18 @@ Route::get('/tasks/products', 'TaskController@exportCsvProducts');
 //payment callback
 Route::get('/payment/callback', 'Api\PaymentController@callback');
 Route::post('/payment/callback', 'Api\PaymentController@callback');
+
+Route::any('/{vue_capture}', function () {
+    return view('layouts.app');
+})->where('vue_capture', '(?!api).*$')
+->where('vue_capture', '^(?!admin).*$')
+->where('vue_capture', '^(?!broadcasting).*$')
+->where('vue_capture', '^(?!laravel-websockets).*$')
+->where('vue_capture', '^(?!tasks/members).*$')
+->where('vue_capture', '^(?!tasks/products).*$')
+->where('vue_capture', '^(?!payment/callback).*$')
+->where('vue_capture', '^(?!notify).*$');
+
 
 // Route::get('/notify', function (){
 //     $product= Product::first();

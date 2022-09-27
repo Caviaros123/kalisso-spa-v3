@@ -50,11 +50,25 @@ Route::post('/payment/callback', 'Api\PaymentController@callback');
 //     Route::post('home/search/getSearchAgency', 'Api\v2\SearchController@getSearch');
 // });
 
+# Socialite URLs
+
+
+
+
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // Kalisso API v1
 Route::group(['prefix' => 'v1'], function () {
     Route::post('/', 'Api\HomeController@index');
+
+    // La page où on présente les liens de redirection vers les providers
+    Route::get("login-register", "Api\SocialiteController@loginRegister");
+
+    // La redirection vers le provider
+    Route::get("redirect/{provider}", "Api\SocialiteController@redirect")->name('socialite.redirect');
+
+    // Le callback du provider
+    Route::get("callback/{provider}", "Api\SocialiteController@callback")->name('socialite.callback');
 
     //USER CONTROLLER
     Route::post('/login', 'Api\UserController@login');

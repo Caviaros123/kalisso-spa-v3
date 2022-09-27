@@ -119,26 +119,28 @@
               <!-- form-group// -->
             </b-form>
           </validation-observer>
-          <!-- <div class="py-2" align="center" hidden>
+          
+          <div class="py-2" align="center">
             <span>OU</span><br />
             <small>Connectez-vous avec</small>
             <div class="pt-3">
               <div class="row">
                 <div class="col-6">
-                  <a href="#" class="btn btn-facebook btn-block">
+                  <a href="/api/v1/redirect/facebook" class="btn btn-facebook btn-block">
                     <i class="fab fa-facebook-f"></i>
                     Facebook</a
                   >
                 </div>
                 <div class="col-6">
-                  <a href="#" class="btn btn-google btn-block">
+                  <a href="/api/v1/redirect/google" class="btn btn-google btn-block">
                     <i class="fab fa-google"></i>
                     Google</a
                   >
                 </div>
               </div>
             </div>
-          </div> -->
+          </div>
+
           <p class="text-center mt-5">
             <span class="text-muted">Vous n'avez pas de compte Kalisso?</span>
             <br />

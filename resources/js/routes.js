@@ -13,7 +13,15 @@ import Payment from "./components/pages/payment/Index";
 import PaymentQuery from "./components/pages/payment/GetPayment.vue";
 
 const routes = [
-     {
+    // {
+    //     path: "redirect/:provider",
+    //     name: "socialite.redirect",
+    //     props: true,
+    //     meta: {
+    //         requiresVisitor: true
+    //     },
+    // },
+    {
         path: "/payment/:query",
         name: "payment.query",
         props: true,

@@ -52,9 +52,8 @@ class TaskController extends Controller
        $fileName = 'produits_kalisso.csv';
        $tasks = Product::all();
        $getCat = Category::all();
-        $path = storage_path('/'.$fileName);
 
-       
+    //    return $getCat;
 
             $headers = array(
                 "Content-type"        => "text/csv",
@@ -67,15 +66,14 @@ class TaskController extends Controller
             $columns = array('id', 'title','description','availability','condition','price','link','image_link','brand', 'google_product_category','fb_product_category','inventory');
 
             $callback = function() use($tasks, $columns) {
-                $file = fopen("produits_kalisso.csv", "w");
+                $file = fopen('php://output', 'w');
                 fputcsv($file, $columns);
 
                 foreach ($tasks as $task) {
                         
                         $catFetch = json_decode($task->category);
                         $getCategory = Category::whereJsonContains('id', $catFetch)->get();
-                       
-
+                    
                         $row['id']  = $task->id;
                         $row['title']   =  strtolower($task->name);
                         $row['description']    = $task->name.' '.$task->details.' '.$task->description.'Vendu par kalisso.com';
@@ -89,7 +87,6 @@ class TaskController extends Controller
                         $row['fb_product_category']  = '313';
                         $row['inventory']  = $task->stock;
            
-                        
 
                         fputcsv($file, array(
                             $row['id'],

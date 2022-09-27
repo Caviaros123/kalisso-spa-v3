@@ -12,6 +12,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Notification;
 use TCG\Voyager\Facades\Voyager;
+use Illuminate\Http\Request;
 
 
 /*
@@ -32,18 +33,36 @@ Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
 
-Route::post('resend/verification-email', function (\Illuminate\Http\Request $request) {
-    $user = User::where('email',$request->input('email'))->first();
+Route::post('resend/verification-email', function (Request $request) {
+
+    $login = $request->validate([
+        'email' => 'required',
+        'password' => 'required|string|min:8',
+    ]);
+
+    if (is_numeric($request->get('email'))) {
+        $login = ['phone' => $request->get('email')];
+    } elseif (filter_var($request->get('email'), FILTER_VALIDATE_EMAIL)) {
+        $login = ['email' => $request->get('email')];
+    }
+
+    $user = User::where('email', $login->email)->orWhere('phone', $login->phone)->first();
+
+    // dd($user);
 
     $user->sendEmailVerificationNotification();
 
     return;
-})->middleware('throttle:6,1')->name('resend.email.verify');
+})->middleware('throttle:6,1');
 
 
 Route::group(['prefix' => 'broadcasting'], function () {
     Broadcast::routes();
 });
+
+//login social
+Route::get("redirect/{provider}", "Api\SocialiteController@redirect")->name('socialite.redirect');
+Route::get("callback/{provider}", "Api\SocialiteController@callback")->name('socialite.callback');
 
 // 	// EXPORT CSV FROM DB
 Route::get('/tasks/members', 'TaskController@exportCsv');
@@ -57,6 +76,9 @@ Route::any('/{vue_capture}', function () {
     return view('layouts.app');
 })->where('vue_capture', '(?!api).*$')
 ->where('vue_capture', '^(?!admin).*$')
+->where('vue_capture', '^(?!redirect/*).*$')
+->where('vue_capture', '^(?!callback/*).*$')
+->where('vue_capture', '^(?!resend/verification-email).*$')
 ->where('vue_capture', '^(?!broadcasting).*$')
 ->where('vue_capture', '^(?!laravel-websockets).*$')
 ->where('vue_capture', '^(?!tasks/members).*$')

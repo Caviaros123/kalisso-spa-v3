@@ -19,9 +19,11 @@
         </router-link>
       </div>
       <div class="card mx-auto" style="max-width: 520px; margin-top: 10px">
+        
         <div v-if="successMessage" class="alert alert-success text-center m-2">
           {{ successMessage }}
         </div>
+       
         <div v-if="serverErrors">
           <div
             class="alert alert-danger text-center m-2"
@@ -31,15 +33,36 @@
           ></div>
         </div>
 
-        <article class="card-body">
-          <header class="mb-4">
+        <article class="card-body text-center text-muted">
+          <header class="mb-3">
             <h4 class="card-title">Inscrivez-vous</h4>
           </header>
 
-          <validation-observer ref="observer" v-slot="{ handleSubmit }">
+          <div class="py-2" align="center">
+            
+            <small>Utiliser votre compte Facebook ou Google pour vous inscrire </small>
+            <div class="pt-4">
+              <div class="row">
+                <div class="col-6">
+                  <a href="/api/v1/redirect/facebook" class="btn btn-facebook btn-block">
+                    <i class="fab fa-facebook-f"></i>
+                    Facebook</a
+                  >
+                </div>
+                <div class="col-6">
+                  <a href="/api/v1/redirect/google"  class="btn btn-google btn-block">
+                    <i class="fab fa-google"></i>
+                    Google</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <validation-observer ref="observer" v-slot="{ handleSubmit }" hidden>
             <b-form @submit.stop.prevent="handleSubmit(singUp)">
               <!-- <form action="#" method="POST" @submit.prevent="singUp()"> -->
-               <div class="form-row">
+               <!-- <div class="form-row">
                 <div class="form-group col-md-6 pb-0 mb-0">
                   <validation-provider
                     name="Nom"
@@ -67,7 +90,6 @@
                     </b-form-group>
                   </validation-provider>
                 </div>
-                <!-- form-group end.// -->
                 <div class="form-group col-md-6 pb-0 mb-0">
                   <validation-provider
                     name="Prénom"
@@ -95,13 +117,13 @@
                     </b-form-group>
                   </validation-provider>
                 </div>
-              </div>
+              </div> -->
 
-              <validation-provider
+              <!-- <validation-provider
                 name="Téléphone"
                 :rules="{ required: true, min: 10 }"
                 v-slot="validationContext"
-              >
+              > 
                 <b-form-group
                   id="example-input-group-1"
                   label="Téléphone"
@@ -121,14 +143,14 @@
                   }}</b-form-invalid-feedback>
                 </b-form-group>
 
-                <!-- <small class="form-text text-muted mb-3"
+                <small class="form-text text-muted mb-3"
                   >Nous ne partagerons jamais votre téléphone avec quelqu'un
                   d'autre.
                   <i class="fas fa-exclamation-triangle text-danger"></i
-                ></small> -->
-              </validation-provider>
+                ></small> 
+             </validation-provider>  -->
 
-              <div class="form-row">
+              <!-- <div class="form-row">
                 <div class="form-group col-md-6">
                   <validation-provider
                     name="Mot de passe"
@@ -157,7 +179,6 @@
                     </b-form-group>
                   </validation-provider>
                 </div>
-                <!-- form-group end.// -->
                 <div class="form-group col-md-6">
                   <validation-provider
                     name="Confirmer votre mot de passe"
@@ -187,7 +208,10 @@
                     </b-form-group>
                   </validation-provider>
                 </div>
-              </div>
+              </div> -->
+
+              
+
 
               <div class="form-group">
                 <label class="custom-control custom-checkbox">
@@ -218,11 +242,15 @@
                   </div>
                 </label>
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <b-button type="submit" variant="btn btn-primary btn-block">Inscription</b-button>
-              </div>
+              </div> -->
             </b-form>
           </validation-observer>
+
+
+
+
         </article>
         <!-- card-body.// -->
       </div>

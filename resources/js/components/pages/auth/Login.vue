@@ -121,7 +121,7 @@
           </validation-observer>
           
           <div class="py-2" align="center">
-            <span>OU</span><br />
+            <div class="or">OU</div>
             <small>Connectez-vous avec</small>
             <div class="pt-3">
               <div class="row">
@@ -132,7 +132,7 @@
                   >
                 </div>
                 <div class="col-6">
-                  <a href="/api/v1/redirect/google" class="btn btn-google btn-block">
+                  <a href="/api/v1/redirect/google"  class="btn btn-google btn-block">
                     <i class="fab fa-google"></i>
                     Google</a
                   >
@@ -193,6 +193,20 @@ export default {
       successMessage: this.dataSuccessMessage || null,
       loading: false,
     };
+  },
+  created() {
+    if (this.$route.query.callback == 'google' || this.$route.query.callback == 'facebook' ) {
+      if (this.$route.query.login == '1') {
+        this.$toast.success({
+          title: "Vous êtes connecté avec " + this.$route.query.callback,
+          message: "Bon retour parmis nous ",
+        });
+        this.password = "";
+        this.serverError = "";
+        localStorage.setItem("isLoggedIn", "true");
+        this.$router.push({ name: "profile.index" });
+      }
+    }
   },
   methods: {
     getValidationState({ dirty, validated, valid = null }) {
@@ -266,3 +280,32 @@ export default {
   },
 };
 </script>
+
+
+<style scoped>
+  .or {
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .or:before,
+  .or:after {
+    background-color: rgb(225, 225, 225);
+    content: "";
+    display: inline-block;
+    height: 1px;
+    position: relative;
+    vertical-align: middle;
+    width: 50%;
+  }
+
+  .or:before {
+    right: 0.5em;
+    margin-left: -50%;
+  }
+
+  .or:after {
+    left: 0.5em;
+    margin-right: -50%;
+  }
+</style>

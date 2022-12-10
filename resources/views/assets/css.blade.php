@@ -98,14 +98,16 @@
 <script>
     var vocadsWidgetId = '6dfc3ec2-44f3-4054-84af-eb71e38ca21f';
     var vocads_ = window.vocads_ || {};
-    (function () {
+    (function() {
         var s = document.createElement('script');
         s.async = true;
         s.src = 'https://cdn.vocads.com/widget/v1.js';
         var parent_node = document.head || document.body;
         parent_node.appendChild(s);
-    })();       
+    })();
 </script>
+
+
 
 
 <!-- <script id="mcjs">
@@ -146,11 +148,14 @@
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYX9DFZG8J"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    window.dataLayer = window.dataLayer || [];
 
-  gtag('config', 'G-GYX9DFZG8J');
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-GYX9DFZG8J');
 </script>
 
 
@@ -192,4 +197,3 @@
 </style>
 
 <script charset="UTF-8" src="//web.webpushs.com/js/push/dadb01f38dd4a150c94d667fc0bcbab5_1.js" async></script>
-

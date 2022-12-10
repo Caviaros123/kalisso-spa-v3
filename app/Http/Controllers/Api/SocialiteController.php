@@ -17,10 +17,10 @@ class SocialiteController extends Controller
     // Les tableaux des providers autorisés
     protected $providers = [ "google", "facebook" ];
 
-    # La vue pour les liens vers les providers
-    public function loginRegister () {
-    	return view("socialite.login-register");
-    }
+    // # La vue pour les liens vers les providers
+    // public function loginRegister () {
+    // 	return view("socialite.login-register");
+    // }
 
     # redirection vers le provider
     public function redirect (Request $request) {

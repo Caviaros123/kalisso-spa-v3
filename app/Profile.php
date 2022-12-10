@@ -12,6 +12,7 @@ class Profile extends Model
      use Likable, Notifiable;
 
      protected $table = 'profiles';
+
      /**
       * The attributes that are mass assignable.
       *
@@ -25,6 +26,11 @@ class Profile extends Model
      public function order_product()
      {
           return $this->hasMany('App\Order', 'product_id', 'store_id');
+     }
+
+     public function user()
+     {
+        return $this->belongsTo(User::class, 'email', 'email');
      }
 
 

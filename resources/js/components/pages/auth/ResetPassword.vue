@@ -142,11 +142,9 @@ export default {
       this.$store
         .dispatch("retrieveToken", {
           username: this.username,
-          password: this.password,
         })
         .then((response) => {
           // console.log(response)
-          this.password = "";
           this.successMessage = "";
           this.serverError = "";
 
@@ -161,7 +159,6 @@ export default {
             message: error.response.data.message
           })
           this.serverError = error.response.data.message;
-          this.password = "";
           this.successMessage = "";
         });
     },

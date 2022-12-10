@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Notification;
 use TCG\Voyager\Facades\Voyager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
 
 
 /*
@@ -28,37 +29,43 @@ use Illuminate\Http\Request;
 // Auth::routes();
 
 // voyager route
-// Auth::routes();
+Auth::routes();
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
 
-Route::post('resend/verification-email', function (Request $request) {
+// Route::post('resend/verification-email', function (Request $request) {
 
-    $login = $request->validate([
-        'email' => 'required',
-        'password' => 'required|string|min:8',
-    ]);
+//     $login = $request->validate([
+//         'email' => 'required',
+//         'password' => 'required|string|min:8',
+//     ]);
 
-    if (is_numeric($request->get('email'))) {
-        $login = ['phone' => $request->get('email')];
-    } elseif (filter_var($request->get('email'), FILTER_VALIDATE_EMAIL)) {
-        $login = ['email' => $request->get('email')];
-    }
+//     if (is_numeric($request->get('email'))) {
+//         $login = ['phone' => $request->get('email')];
+//     } elseif (filter_var($request->get('email'), FILTER_VALIDATE_EMAIL)) {
+//         $login = ['email' => $request->get('email')];
+//     }
 
-    $user = User::where('email', $login->email)->orWhere('phone', $login->phone)->first();
+//     $user = User::where('email', $login->email)->orWhere('phone', $login->phone)->first();
 
-    // dd($user);
+//     // dd($user);
 
-    $user->sendEmailVerificationNotification();
+//     $user->sendEmailVerificationNotification();
 
-    return;
-})->middleware('throttle:6,1');
+//     return;
+// })->middleware('throttle:6,1');
 
 
 Route::group(['prefix' => 'broadcasting'], function () {
     Broadcast::routes();
 });
+
+// Route::get('/reset-password/{token}', function ($token) {
+//     return redirect()->back('reset/password', ['token' => $token]);
+// })->middleware('guest')->name('password.reset');
+
+Route::get("/reset-password/{token}", "Api\AuthController@resetPassord")->middleware('guest')->name('password.reset');
 
 //login social
 Route::get("redirect/{provider}", "Api\SocialiteController@redirect")->name('socialite.redirect');
@@ -75,16 +82,16 @@ Route::post('/payment/callback', 'Api\PaymentController@callback');
 Route::any('/{vue_capture}', function () {
     return view('layouts.app');
 })->where('vue_capture', '(?!api).*$')
-->where('vue_capture', '^(?!admin).*$')
-->where('vue_capture', '^(?!redirect/*).*$')
-->where('vue_capture', '^(?!callback/*).*$')
-->where('vue_capture', '^(?!resend/verification-email).*$')
-->where('vue_capture', '^(?!broadcasting).*$')
-->where('vue_capture', '^(?!laravel-websockets).*$')
-->where('vue_capture', '^(?!tasks/members).*$')
-->where('vue_capture', '^(?!tasks/products).*$')
-->where('vue_capture', '^(?!payment/callback).*$')
-->where('vue_capture', '^(?!notify).*$');
+    ->where('vue_capture', '^(?!admin).*$')
+    ->where('vue_capture', '^(?!redirect/*).*$')
+    ->where('vue_capture', '^(?!callback/*).*$')
+    ->where('vue_capture', '^(?!resend/verification-email).*$')
+    ->where('vue_capture', '^(?!broadcasting).*$')
+    ->where('vue_capture', '^(?!laravel-websockets).*$')
+    ->where('vue_capture', '^(?!tasks/members).*$')
+    ->where('vue_capture', '^(?!tasks/products).*$')
+    ->where('vue_capture', '^(?!payment/callback).*$')
+    ->where('vue_capture', '^(?!notify).*$');
 
 
 // Route::get('/notify', function (){
@@ -257,5 +264,3 @@ Route::any('/{vue_capture}', function () {
 // Route::post('contact-us', 'ContactController@saveContact');
 
 //  Route::post('notifications', 'ContactController@sendNotification');
-
-

@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Broadcast;
 use TCG\Voyager\Facades\Voyager;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -59,7 +60,11 @@ Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // Kalisso API v1
 Route::group(['prefix' => 'v1'], function () {
+
     Route::post('/', 'Api\HomeController@index');
+
+
+    Route::post('/forgot-password', 'Api\AuthController@forgotPassword');
 
     // La page où on présente les liens de redirection vers les providers
     Route::get("login-register", "Api\SocialiteController@loginRegister");
@@ -72,6 +77,7 @@ Route::group(['prefix' => 'v1'], function () {
 
     //USER CONTROLLER
     Route::post('/login', 'Api\UserController@login');
+    Route::post('/login/with/social', 'Api\AuthController@loginWithSocial');
     Route::post('/check', 'Api\UserController@checkUser');
     Route::post('/loginWithOtp', 'Api\UserController@loginWithOtp');
     Route::post('/sendOtp', 'Api\UserController@sendOtp');
@@ -125,11 +131,12 @@ Route::group(['prefix' => 'v1'], function () {
     //WISHLIST CONTROLLER
     Route::post('wishlist/getWishlist', 'Api\WishlistController@getWishlist');
 
+
     Route::group(['middleware' => 'auth:sanctum'], function () {
-        Route::get('/logout', 'Api\UserController@logout');
-        Route::get('/user', 'Api\UserController@getCurrentUser');
-        //user controller
         Route::post('account/user/manage/store', 'Api\UserController@getUserStore');
+        Route::get('/logout', 'Api\UserController@logout');
+        Route::get('/user/{token?}', 'Api\UserController@getCurrentUser');
+        //user controller
         Route::post('account/user/update/profile', 'Api\UserController@updatePictureProfile');
         Route::post('account/user/update/profile/global', 'Api\UserController@update');
         Route::post('account/user/product/addToLastSeen', 'Api\UserController@addProductLastSeen');

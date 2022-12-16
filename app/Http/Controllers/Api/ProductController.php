@@ -9,6 +9,7 @@ use App\Profile;
 use App\Category;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Image;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\StoreResource;
@@ -18,9 +19,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        # code...
-
-        $products = Product::all();
+        $products = Product::allProducts();
 
         $this->response['message'] = 'success';
         $this->response['data'] = ProductResource::collection($products);

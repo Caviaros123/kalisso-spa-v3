@@ -16,8 +16,10 @@
                     <button class="list-group-item" :class="activeTab === 'ProfileSettings' ? 'active' :''" @click="activeTab = 'ProfileSettings' " href="#"> Paramètres </button>
                     <!-- <router-link :to="{ name: 'logout'}" class="list-group-item" href="#"> Déconnexion </router-link> -->
                 </nav>
+                <div>{{JSON.stringify(this.$store.orders)}}</div>
+
                 <br>
-                <a href="/admin"  class="btn btn-danger btn-block" > <i class="fab fa-kickstarter"></i> <span class="text">Mon K-Panel</span> </a>
+                <a v-if="this.$store.user" href="/admin"  class="btn btn-danger btn-block" > <i class="fab fa-kickstarter"></i> <span class="text">Mon K-Panel</span> </a>
                 <br>
                 <router-link :to="{ name: 'logout'}"  class="btn btn-light btn-block" > <i class="fa fa-power-off text-danger"></i> <span class="text">Déconnexion</span> </router-link>
                 <br>

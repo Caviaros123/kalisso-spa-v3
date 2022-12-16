@@ -156,10 +156,11 @@ class UserController extends Controller
         $data = [];
         $order = [];
 
-
-        $getSessionId = DB::table('tbl_session')->first();
+        // $getSessionId = DB::table('tbl_session')->first();
         $user =  Auth::user();
-        $store = DB::table('profiles')->where('email', $user->email)->orWhere('phone', $user->phone)->orWhere('store_id', $user->store_id)->first();
+
+        // return $user;
+        $store = Profile::where('email', $user->email)->orWhere('phone', $user->phone)->orWhere('store_id', $user->store_id)->first();
         $uid = Auth::id();
 
         if (request()->has('skip') && request()->has('limit')) {
@@ -171,7 +172,6 @@ class UserController extends Controller
         $getProductId = Product::where('store_id', $store->store_id)->orderBy('id', 'desc')->get('id');
 
         foreach ($getProductId as $key => $value) {
-
             $data[] = $value['id'];
         }
 
@@ -191,13 +191,6 @@ class UserController extends Controller
 
         $products_order = Product::whereIn('id', $product_ordering_id)->orderBy('id', 'desc')->get();
 
-        // return response()->json([
-        //     'p' => count($products_order),
-        //     'o' => count($orders),
-        // ])
-
-        // $combined = array_combine($orders, $products_order);
-        // $combined = array_merge($orders, $products_order);
 
         foreach ($orders as $ko => $vo) {
             foreach ($products_order as $kp => $vp) {
@@ -232,8 +225,7 @@ class UserController extends Controller
 
         try {
 
-            if ($request->get('session_id') == $getSessionId->session_id) {
-                if ($store != null) {
+             if ($store != null) {
                     return response()->json([
                         "status" => 200,
                         "msg" => "Success",
@@ -242,17 +234,10 @@ class UserController extends Controller
                 } else {
                     return response()->json([
                         'success' => false,
-                        'message' => 'aucune boutique trouver',
+                        'message' => 'aucune boutique trouvé',
                         "data" => []
                     ], 404);
                 }
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'false',
-                    'data' => $request,
-                ], 404);
-            }
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -606,8 +591,9 @@ class UserController extends Controller
     public function login(Request $request)
     {
 
-        $login = $request->validate([
+        $request->validate([
             'email' => 'required',
+            'source' => 'string|max:3|min:3',
             'password' => 'required|string|min:8',
         ]);
 
@@ -619,7 +605,9 @@ class UserController extends Controller
 
         if (Auth::attempt($login)) {
             $user = Auth::user();
-            $success['token'] = $user->createToken($request->get('device_name') ?? 'device_name')->accessToken;
+            $token = $user->createToken($request->get('device_name') ?? 'device_name');
+ 
+            $success['token'] =  $request->get('source') === 'app' ? $token->plainTextToken : $user->accessToken;
             //After successfull authentication, notice how I return json parameters
             return response()->json([
                 'success' => true,
@@ -640,13 +628,22 @@ class UserController extends Controller
 
     public function loginWithOtp(Request $request)
     {
+        $request->validate([
+            'phone' =>  'required|string',
+            'status' =>'required|string',
+            'source' =>'required|string',
+        ]);
+
         $user = User::where([['phone', '=', request('phone')]])->first();
 
         if ($user) {
 
             Auth::login($user, true);
             $user = Auth::user();
-            $success['token'] = $user->createToken(request('device_name'))->accessToken;
+
+            $token = $user->createToken($request->get('device_name') ?? 'device_name');
+ 
+            $success['token'] =  $request->get('source') === 'app' ? $token->plainTextToken : $user->accessToken;
             //User::where('phone','=', $request->phone)->update(['otp' => null]);
 
             DB::table('users')->where('id', Auth::id())->update([
@@ -758,7 +755,6 @@ class UserController extends Controller
         $otp = rand(100000, 999999);
         $user = '';
 
-        
         $request->validate([
             'phone' => 'numeric|required_without:email|min:9',
             'email' => 'email|required_without:phone',
@@ -804,8 +800,10 @@ class UserController extends Controller
         $request->merge([
             'phone' => phoneNumber($request->phone),
             'name' => $request->firstname,
-            'phone_verified_at'=> NOW(),
+            'phone_verified_at'=>$request->phone_verified_at == 1 ? NOW() : null,
             'otp' => null,
+            'isSeller' => $request->isSeller == 1 ? true : false,
+            'registered_from' => $request->get('source'),
             'remember_token' => Str::random(60)
         ]);
 
@@ -836,14 +834,15 @@ class UserController extends Controller
                 $input = $request->all();
                 $input['password'] = bcrypt($input['password']);
                 $user = User::create($input);
-                $success['token'] = $user->createToken('appToken')->accessToken;
+                $token = $user->createToken($request->get('device_name') ?? 'device_name');
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Félicitations vous êtes inscrit sur la plus grande\n plateforme de vente en ligne au Congo-Brazzaville',
-                    'token' => $success,
-                    'data' => $user
-                ]);
+                $success['token'] =  $request->get('source') === 'app' ? $token->plainTextToken : $user->createToken($request->get('device_name') ?? 'device_name')->accessToken;
+                
+                $login = ['phone' => $request->get('phone'), 'password' => $request->get('password')];
+                Auth::attempt($login);
+
+                return $this->getCurrentUser($success);
+
             } catch (ServerException $e) {
                 return $e;
             }
@@ -896,7 +895,7 @@ class UserController extends Controller
     public function products()
     {
         # code...
-        $products = Product::all();
+        $products = Product::allProducts();
 
         $this->response['message'] = 'success';
         $this->response['data'] = $products;
@@ -905,9 +904,8 @@ class UserController extends Controller
     }
 
 
-    public function getCurrentUser()
+    public function getCurrentUser($token = null)
     {
-        # code...
         $user =  Auth::user();
         $productWishlist = [];
         $orders = $user->orders()->with('products')->latest()->get();
@@ -934,15 +932,17 @@ class UserController extends Controller
             ->orderByDesc('default_address')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User information',
-            'data' => $user,
-            'orders' => $orders,
-            'wishlist' => $productWishlist,
-            'address' => $defaultAddress,
-            'totalAddress' => $totalAddress
-        ]);
+       
+            return response()->json([
+                'success' => true,
+                'message' => 'User information',
+                'token' => $token ?? '',
+                'data' => $user,
+                'orders' => $orders,
+                'wishlist' => $productWishlist,
+                'address' => $defaultAddress,
+                'totalAddress' => $totalAddress
+            ]);
     }
 
     public function categories()

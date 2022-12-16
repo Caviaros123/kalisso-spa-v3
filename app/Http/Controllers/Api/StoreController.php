@@ -10,6 +10,7 @@ use App\User;
 use App\Category;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Image;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\StoreResource;
@@ -18,11 +19,11 @@ use Illuminate\Support\Facades\DB;
 
 class StoreController extends Controller
 {
-    
+
     public function createStore(Request $request)
     {
-       $request->validate([
-            'from' => 'required|string|max:255',
+        $request->validate([
+            'from' => 'required|string|max:3',
             'name' => 'required|string|max:255',
             'category' => 'required',
             'description' => 'required|string|max:3000',
@@ -32,80 +33,89 @@ class StoreController extends Controller
             'country' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'town' => 'required|string|max:255',
-            'founder_name' => 'required|string|max:255',
+            'founder_name' => 'required|string|max:80',
         ]);
 
-
-        // return $request->form;
-
-        // $avatar = Avatar::create($request->name)->save('sample.jpg', 75);
-
-        // return $avatar;
-
-        //create avatar with charcter name
-
-        // $avatar = Avatar::create($request->name)->save('sample.jpg', 50);
+        $user = Auth::user();
 
         $store =  Profile::create([
             'store_name' => ucfirst($request->name),
             'type' => $request->category,
             'description' => $request->description,
             'store_id' => $request->from === 'app' ? generateStoreId('AP') : generateStoreId('WB'),
-            'adress' => $request->address, 
+            'adress' => $request->address,
             'country' => $request->country,
             'state' => $request->state,
-            'town'=> $request->town ?? '',
-            'phone' => $request->phone,
+            'town' => $request->town ?? '',
+            'phone' => phoneNumber($request->phone),
             'logo' => $request->logo ?? "\/storage\/boutique\/images\/02052021608e952bb3331site_kali_icon.png",
             'document' => $document ?? '',
             'images' => $document2 ?? '',
-            'founder_name' => $request->founder_name ,
+            'founder_name' => $request->founder_name,
             'capital_price' => $request->capital_price ?? 0,
             'email' => $request->email,
             'slug' => slugify($request->name),
-       ]);
+        ]);
 
-    //    return $store;
 
-       if($store){
-           
-           if($request->newEmail){
-               User::where('phone', $request->phone)->update([
-                   'store_id' => $store->store_id,
-                   'isSeller' => true,
-                   'email'    => $request->email,
-                   'role_id' => 3,
-                   /*'type' => $store->type,*/
-               ]);
-           }else {
-                User::where('email', $request->email)->orWhere('phone', $request->phone)->update([
+
+        if ($store) {
+            if ($request->newEmail) {
+
+                $user->store_id = $store->store_id;
+                $user->isSeller = 1;
+                $user->email = $store->email;
+                $user->email_verified_at = NOW();
+                $user->role_id = 3;
+
+                $user->save();
+
+                // User::where('phone', $store->phone)->update([
+                //     'store_id' => $store->store_id,
+                //     'isSeller' => 1,
+                //     'email'    => $store->email,
+                //     'email_verified_at' => NOW(),
+                //     'role_id' => 3,
+                //     /*'type' => $store->type,*/
+                // ]);
+            } else if ($request->newPhone) {
+                User::where('email', $store->email)->update([
                     'store_id' => $store->store_id,
-                    'isSeller' => true,
+                    'isSeller' => 1,
+                    'phone'    => phoneNumber($request->phone),
+                    'phone_verified_at' => NOW(),
                     'role_id' => 3,
-                   /* 'type' => $store->type,*/
+                    /*'type' => $store->type,*/
                 ]);
-           }
+            } else {
+                User::where('email', $store->email)->orWhere('phone', $store->phone)->update([
+                    'store_id' => $store->store_id,
+                    'isSeller' => 1,
+                    'role_id' => 3,
+                    /* 'type' => $store->type,*/
+                ]);
+            }
 
-           return response()->json([
+            return response()->json([
                 'success' => true,
                 'message' => 'Votre boutique à été crée  avec succès',
                 'data' => $store,
             ], 200);
-       }else{
+        } else {
             return response()->json([
                 'success' => false,
                 'message' => 'Votre boutique n\'a pas été crée',
                 'data' => [],
             ], 200);
-       }
-        
+        }
+
         // $store = new StoreResource($request->all());
         // $store->save();
-        
+
         // $store->image = $request->image->store('uploads', 'public');
         // $store->save();
-        
-       
+
+
     }
 
     public function checkoutPlanSubscription(Request $request)
@@ -124,27 +134,27 @@ class StoreController extends Controller
         $setNewPlan =  DB::table('transactions')->insert([
             'amount' => $request->amount,
             'reference' => $ref,
-            'object'=> $request->type.' '.$request->reference,
+            'object' => $request->type . ' ' . $request->reference,
             'user' => Auth::id(),
             'status' => 'En attente',
             'created_at' => now(),
             'updated_at' => now()
         ]);
 
-    
+
         // return $setNewPlan;
 
         if ($setNewPlan) {
 
-             DB::table('subscriptions')->insert([
+            DB::table('subscriptions')->insert([
                 'user_id' => Auth::id(),
                 'name' => $request->type,
-                'stripe_id'  => $ref, 
-                'stripe_status' => 'pending', 
-                'stripe_plan' => $request->reference, 
-                'quantity'  => 1, 
-                'trial_ends_at' => date('Y-m-d H:m:s', strtotime('+14 days')), 
-                'ends_at'  =>  date('Y-m-d H:m:s', strtotime('+1 month')), 
+                'stripe_id'  => $ref,
+                'stripe_status' => 'pending',
+                'stripe_plan' => $request->reference,
+                'quantity'  => 1,
+                'trial_ends_at' => date('Y-m-d H:m:s', strtotime('+14 days')),
+                'ends_at'  =>  date('Y-m-d H:m:s', strtotime('+1 month')),
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
@@ -158,7 +168,7 @@ class StoreController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Plan successfully set',
-                'data' => [$getPlan , Epay($request)],
+                'data' => [$getPlan, Epay($request)],
             ], 200);
         } else {
             return response()->json([
@@ -177,18 +187,20 @@ class StoreController extends Controller
         ]);
 
         $find = Profile::where('slug', $request->slug)
-                        ->orWhere('id', $request->store_id)
-                        ->orWhere('store_id', $request->store_id)
-                        ->orWhere('email', $request->email)
-                        ->with('products')->get();
+            ->orWhere('id', $request->store_id)
+            ->orWhere('store_id', $request->store_id)
+            ->orWhere('email', $request->email)
+            ->with('products')->first();
 
-        if(count($find) ==! 0){
+        // return $find->products->description;
+
+        if (!empty($find)) {
             return response()->json([
                 'success' => true,
                 // 'datas' => $find,
-                'data' => StoreResource::collection($find),
+                'data' => StoreResource::collection([$find]),
             ], 200);
-        }else{
+        } else {
             return response()->json([
                 'success' => false,
                 'data' => [],

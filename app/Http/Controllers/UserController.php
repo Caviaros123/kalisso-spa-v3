@@ -95,7 +95,7 @@ class UserController extends Controller
               $user = Auth::user();
               $success['token'] = $user->createToken(request('device_name'))->accessToken;
               User::where('phone','=', $request->phone)->update(['otp' => null]);
-          //After successfull authentication, notice how I return json parameters
+              //After successfull authentication, notice how I return json parameters
               return response()->json([
                   'success' => true,
                   'token' => $success,
@@ -214,7 +214,7 @@ class UserController extends Controller
     {
         
           # code...
-          $products = Product::all();
+          $products = Product::allProducts();
   
           $this->response['message'] = 'success';
           $this->response['data'] = $products;

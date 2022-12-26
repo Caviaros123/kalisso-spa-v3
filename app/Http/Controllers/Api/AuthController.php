@@ -195,7 +195,7 @@ class AuthController extends Controller
   {
 
     # code...
-    $products = Product::allProducts();
+    $products = Product::all();
 
     $this->response['message'] = 'success';
     $this->response['data'] = $products;

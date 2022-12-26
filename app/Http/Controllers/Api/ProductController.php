@@ -19,7 +19,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::allProducts();
+        $products = Product::all();
 
         $this->response['message'] = 'success';
         $this->response['data'] = ProductResource::collection($products);

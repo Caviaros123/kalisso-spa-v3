@@ -41,7 +41,7 @@ class CheckoutController extends Controller
     public function update(Request $request)
     {
         //validate the request
-       $request->vaidate([
+        $request->vaidate([
             'order_id' => 'required|string|max:255',
             'payment_status' => 'required|string|max:255',
             'payment_method' => 'required|string|max:255',
@@ -57,8 +57,8 @@ class CheckoutController extends Controller
 
         //send notification to user
         $user = User::find($order->user_id);
-        $user->notify(new \App\Notifications\OrderPlaced($order));
-        
+        $user->notify(new OrderPlaced($order));
+
         return response()->json([
             'success' => true,
             'message' => 'Order updated successfully'
@@ -89,7 +89,7 @@ class CheckoutController extends Controller
 
         $request->merge([
             'cartItemList' => $getCart
-        ]); 
+        ]);
 
         if (count($request->cartItemList) === 0) {
             return response()->json([
@@ -102,10 +102,10 @@ class CheckoutController extends Controller
         // return $cartItem;
 
         // $phone_number = phoneNumber(Auth::user()->phone);
-        if($request->useDefaultAddress){
+        if ($request->useDefaultAddress) {
             $getAddress = DB::table('tbl_address')->where('default_address', 1)->where('user_id', Auth::id())->first();
             unset($request['newAddress']);
-        }else{
+        } else {
             // return $request;
             $phone = str_replace(" ", '', phoneNumber($request->newAddress['phone']));
             $request->merge([
@@ -127,33 +127,32 @@ class CheckoutController extends Controller
 
             // return $request->newAddress['saveAsDefaultAddress'];
 
-            if($request->newAddress['saveAsDefaultAddress']){
+            if ($request->newAddress['saveAsDefaultAddress']) {
                 DB::table('tbl_address')->where('user_id', auth()->id())->where('default_address', 1)->update([
-                    'default_address'=> false,
+                    'default_address' => false,
                 ]);
             }
-            
+
             DB::table('tbl_address')->insert([
-               'recipient_name' => $request->newAddress['name'].' '.$request->newAddress['lastname'],
-               'address_line1' => $request->newAddress['address'],
-               'phone_number' => $request->phone,
-               'country' => $request->newAddress['country'],
-               'state' => $request->newAddress['city'],
-               'title' => '#'.rand(100000, 999999),
-               'default_address' => true,
-               'created_at'=> NOW(), 
-               'updated_at'=> NOW(),
-               'user_id' => auth()->id(),
+                'recipient_name' => $request->newAddress['name'] . ' ' . $request->newAddress['lastname'],
+                'address_line1' => $request->newAddress['address'],
+                'phone_number' => $request->phone,
+                'country' => $request->newAddress['country'],
+                'state' => $request->newAddress['city'],
+                'title' => '#' . rand(100000, 999999),
+                'default_address' => true,
+                'created_at' => NOW(),
+                'updated_at' => NOW(),
+                'user_id' => auth()->id(),
             ]);
 
             $getAddress = DB::table('tbl_address')->where('user_id', auth()->id())->where('default_address', 1)->first();
-
         }
 
         $checkProduct = array();
-        
+
         if (!$getAddress) {
-           return response()->json([
+            return response()->json([
                 'success' => false,
                 'message' => 'Echec de la commande vous n\'avez pas d\'adresse de livraison!',
                 'data' => $getAddress
@@ -169,14 +168,14 @@ class CheckoutController extends Controller
             'phone'                     => phoneNumber($getAddress->phone_number),
             'country'                   => $getAddress->country,
             'payment_gateway'           => $request->payment_gateway ?? 'epay',
-            'Reference'                 => trim(str_replace(['-',':',' '], '', 'K'.date('dmyHis').rand(1000, 9999))),
+            'Reference'                 => trim(str_replace(['-', ':', ' '], '', 'K' . date('dmyHis') . rand(1000, 9999))),
             'paymentStatus'            => 'pending',
             'shipped'                   => false,
             'pin_code'                  => rand(1000000, 9999999),
             'shoppingcart'              => $getCart
         ]);
 
-        foreach($request->get('shoppingcart') as $sk => $sv){
+        foreach ($request->get('shoppingcart') as $sk => $sv) {
             $checkProduct[$sk] = $sv->product_id;
         }
 
@@ -184,7 +183,7 @@ class CheckoutController extends Controller
 
         $resultProduct = Product::whereIn('id', $checkProduct)->get();
 
-        if(count($resultProduct) != $countProduct) {
+        if (count($resultProduct) != $countProduct) {
             return response()->json([
                 'success' => false,
                 'message' => 'Echec un de vos produit n\'est plus valide!',
@@ -199,15 +198,15 @@ class CheckoutController extends Controller
         //         'data' => $request->shoppingcart
         //     ], 400);
         // }
-        
-        try{
+
+        try {
             $order = $this->addToOrdersTables($request, null);
-            
+
             // auth()->user()->notify(new OrderPlaced($order));
             Mail::send(new OrderPlaced($order));
             // Broadcast(new OrderPlaced($order));
-            
-             //delete user cart
+
+            //delete user cart
             DB::table('tbl_shopping_cart')->where('user_id', Auth::id())->delete();
 
             return response()->json([
@@ -215,14 +214,13 @@ class CheckoutController extends Controller
                 'message'           => 'Votre commande à bien été enregistrer',
                 'data'              => Epay($request),
             ], 200);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e,
                 'data' => $e
             ], 400);
         }
-        
     }
 
 
@@ -268,5 +266,4 @@ class CheckoutController extends Controller
 
         return $order;
     }
-
 }

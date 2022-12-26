@@ -50,7 +50,7 @@ class TaskController extends Controller
     public function exportCsvProducts(Request $request)
     {
        $fileName = 'produits_kalisso.csv';
-       $tasks = Product::allProducts();
+       $tasks = Product::all();
        $getCat = Category::all();
 
     //    return $getCat;

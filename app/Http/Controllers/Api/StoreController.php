@@ -181,23 +181,17 @@ class StoreController extends Controller
     public function getStoreInfo(Request $request)
     {
         $request->validate([
-            'slug' => 'string',
-            'email' => 'email',
-            'store_id' => 'string',
+            'email' => 'required_without:store_id|email|required',
+            'store_id' => 'required_without:email|string',
         ]);
 
-        $find = Profile::where('slug', $request->slug)
-            ->orWhere('id', $request->store_id)
-            ->orWhere('store_id', $request->store_id)
-            ->orWhere('email', $request->email)
+        $find = Profile::where('store_id', $request->get('store_id'))
+            ->orWhere('email', $request->get('email'))
             ->with('products')->first();
-
-        // return $find->products->description;
 
         if (!empty($find)) {
             return response()->json([
                 'success' => true,
-                // 'datas' => $find,
                 'data' => StoreResource::collection([$find]),
             ], 200);
         } else {

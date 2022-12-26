@@ -160,8 +160,6 @@ class CartController extends Controller
                 ->where('product_id', $request->product_id)
                 ->first();
 
-            
-
             if ($duplicated == null) {
                 
                 return response()->json([

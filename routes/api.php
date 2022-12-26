@@ -53,9 +53,6 @@ Route::post('/payment/callback', 'Api\PaymentController@callback');
 
 # Socialite URLs
 
-
-
-
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // Kalisso API v1
@@ -125,14 +122,12 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('getAllStore', 'Api\HomeController@getAllStore');
     Route::get('request/fetch/data/payment/getEpayData', 'Api\PaymentController@getEpayData');
 
-    //CART CONTROLLER
-    Route::post('shopping_cart/getShoppingCart', 'Api\CartController@getShoppingCart');
-
-    //WISHLIST CONTROLLER
-    Route::post('wishlist/getWishlist', 'Api\WishlistController@getWishlist');
-
-
     Route::group(['middleware' => 'auth:sanctum'], function () {
+            //WISHLIST CONTROLLER
+        Route::post('wishlist/getWishlist', 'Api\WishlistController@getWishlist');
+            //CART CONTROLLER
+            
+        Route::post('shopping_cart/getShoppingCart', 'Api\CartController@getShoppingCart');
         Route::post('account/user/manage/store', 'Api\UserController@getUserStore');
         Route::get('/logout', 'Api\UserController@logout');
         Route::get('/user/{token?}', 'Api\UserController@getCurrentUser');

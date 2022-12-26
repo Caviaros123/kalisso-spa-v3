@@ -30,10 +30,10 @@ class Product extends Model
     protected $fillable = ['id', 'name', 'slug', 'details', 'description', 'price', 'etat', 'old_price', 'category', 'stock', 'image', 'images', 'email', 'featured', 'store_id', 'location', 'livraison', 'rating', 'review'];
 
 
-    public static function allProducts()
-    {
-        return self::where('featured', 1)->get();
-    }
+    // public static function allProducts()
+    // {
+    //     return self::where('featured', 1)->get();
+    // }
 
     public function user()
     {

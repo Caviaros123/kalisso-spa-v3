@@ -36,7 +36,6 @@ class UserController extends Controller
 
             $orders = auth()->user()->orders()->with('products')->latest()->skip($request->skip)->limit($request->limit)->get();
 
-            
             return response()->json([
                 'success' => true,
                 'message' => 'Voici vos commandes',
@@ -895,7 +894,7 @@ class UserController extends Controller
     public function products()
     {
         # code...
-        $products = Product::allProducts();
+        $products = Product::all();
 
         $this->response['message'] = 'success';
         $this->response['data'] = $products;

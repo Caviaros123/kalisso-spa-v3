@@ -30,7 +30,7 @@ class Profile extends Model
 
      public function user()
      {
-        return $this->belongsTo(User::class, 'email', 'email');
+          return $this->belongsTo(User::class, 'email', 'email');
      }
 
 
@@ -39,21 +39,21 @@ class Profile extends Model
           return $this->hasMany('App\Product', 'store_id', 'store_id');
      }
 
-      /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function followers()
-    {
-        return $this->belongsToMany(User::class, 'followers', 'store_id', 'follower_id')->withTimestamps();
-    }
+     /**
+      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+      */
+     public function followers()
+     {
+          return $this->belongsToMany(User::class, 'followers', 'store_id', 'follower_id')->withTimestamps();
+     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function followings()
-    {
-        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'store_id')->withTimestamps();
-    }
+     /**
+      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+      */
+     public function followings()
+     {
+          return $this->belongsToMany(User::class, 'followers', 'follower_id', 'store_id')->withTimestamps();
+     }
 
      public function reviews()
      {

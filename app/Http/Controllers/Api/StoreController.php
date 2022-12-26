@@ -35,7 +35,6 @@ class StoreController extends Controller
             'town' => 'required|string|max:255',
             'founder_name' => 'required|string|max:80',
         ]);
-
         $user = Auth::user();
 
         $store =  Profile::create([
@@ -54,7 +53,7 @@ class StoreController extends Controller
             'founder_name' => $request->founder_name,
             'capital_price' => $request->capital_price ?? 0,
             'email' => $request->email,
-            'slug' => slugify($request->name),
+            'slug' => slugify($request->name.uniqid()),
         ]);
 
 
@@ -67,7 +66,6 @@ class StoreController extends Controller
                 $user->email = $store->email;
                 $user->email_verified_at = NOW();
                 $user->role_id = 3;
-
                 $user->save();
 
                 // User::where('phone', $store->phone)->update([
@@ -87,7 +85,7 @@ class StoreController extends Controller
                     'role_id' => 3,
                     /*'type' => $store->type,*/
                 ]);
-            } else {
+            } else { 
                 User::where('email', $store->email)->orWhere('phone', $store->phone)->update([
                     'store_id' => $store->store_id,
                     'isSeller' => 1,

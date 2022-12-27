@@ -18,8 +18,6 @@ class Product extends Model
 
     use Likable, Notifiable;
 
-    protected $guarded = [];
-
     protected $table = 'products';
 
     /**

@@ -179,7 +179,7 @@ class StoreController extends Controller
     public function getStoreInfo(Request $request)
     {
         $request->validate([
-            'email' => 'required_without:store_id|email|required',
+            'email' => 'required_without:store_id|email',
             'store_id' => 'required_without:email|string',
         ]);
 

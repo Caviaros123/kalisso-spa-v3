@@ -25,12 +25,12 @@ class Profile extends Model
 
      public function order_product()
      {
-          return $this->hasMany('App\Order', 'product_id', 'store_id');
+          return $this->hasMany('App\Order');
      }
 
      public function user()
      {
-          return $this->belongsTo(User::class, 'email', 'email');
+          return $this->belongsTo(User::class);
      }
 
 

@@ -98,38 +98,37 @@ class UserController extends Controller
 
         if (!is_dir($path)) {
             $path = mkdir($path, 0755, true);
-        } else{
+        } else {
             $path = $path;
         }
-        
+
         $request->validate([
             'image'   => 'present|required|image|mimes:jpg,jpeg,png,svg,gif|max:2048'
         ]);
 
-        if($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
 
             try {
 
-                $chemin = $request->file('image')->store('users/'. date('FY'));
+                $chemin = $request->file('image')->store('users/' . date('FY'));
 
                 $id = Auth::user()->id;
                 $user = User::find($id);
                 $user->avatar = $chemin;
                 $user->save();
 
-                if($user != null){
+                if ($user != null) {
                     return response()->json([
                         'success' => true,
                         'message' => 'Votre photo de profile a bien été mise à jour',
                         'data' => $user
                     ], 200);
-                }else{
+                } else {
                     return response()->json([
                         'success' => false,
                         'message' => 'Echec'
                     ], 400);
                 }
-
             } catch (ServerException $e) {
                 return response()->json([
                     'success' => false,
@@ -137,7 +136,6 @@ class UserController extends Controller
                 ], 400);
             }
         }
-        
     }
 
     public function getUserStore(Request $request)
@@ -158,15 +156,12 @@ class UserController extends Controller
         // $getSessionId = DB::table('tbl_session')->first();
         $user =  Auth::user();
 
-        // return $user;
-        $store = Profile::where('email', $user->email)->orWhere('phone', $user->phone)->orWhere('store_id', $user->store_id)->first();
+        $store = Profile::where('email', $user->email)->orWhere('store_id', $user->store_id)->with(['products', 'user'])->first();
         $uid = Auth::id();
 
-        if (request()->has('skip') && request()->has('limit')) {
-            $products = Product::where('store_id', $store->store_id)->orderBy('id', 'desc')->skip($request->skip)->limit($request->limit)->get();
-        } else {
-            $products = Product::where('store_id', $store->store_id)->orderBy('id', 'desc')->get();
-        }
+        // $orderProduct = OrderProduct::with('products', 'order')->get();
+
+        // return $order;
 
         $getProductId = Product::where('store_id', $store->store_id)->orderBy('id', 'desc')->get('id');
 
@@ -178,7 +173,6 @@ class UserController extends Controller
         $product_ordering_id = OrderProduct::whereIn('product_id', $data)->get('product_id');
 
         foreach ($product_ordering as $key => $value) {
-
             $order[] = $value['order_id'];
         }
 
@@ -189,7 +183,6 @@ class UserController extends Controller
         }
 
         $products_order = Product::whereIn('id', $product_ordering_id)->orderBy('id', 'desc')->get();
-
 
         foreach ($orders as $ko => $vo) {
             foreach ($products_order as $kp => $vp) {
@@ -203,8 +196,7 @@ class UserController extends Controller
             }
         }
 
-        // code...
-        foreach ($products as $key => $value) {
+        foreach ($store->products as $key => $value) {
             $product[$key]["id"] = (int) $value['id'];
             $product[$key]["name"] = $value['name'];
             $product[$key]["price"] = (float) $value['price'];
@@ -223,21 +215,20 @@ class UserController extends Controller
         );
 
         try {
-
-             if ($store != null) {
-                    return response()->json([
-                        "status" => 200,
-                        "msg" => "Success",
-                        "data" => $data
-                    ], 200);
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'aucune boutique trouvé',
-                        "data" => []
-                    ], 404);
-                }
-        } catch (Exception $e) {
+            if ($store != null) {
+                return response()->json([
+                    "status" => 200,
+                    "msg" => "Success",
+                    "data" => $data
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'aucune boutique trouvé',
+                    "data" => []
+                ], 404);
+            }
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Echec',
@@ -245,6 +236,7 @@ class UserController extends Controller
             ], 404);
         }
     }
+
     public function addProductLastSeen(Request $request)
     {
         $request->merge([
@@ -349,24 +341,24 @@ class UserController extends Controller
         ]);
 
         $updateAddress = DB::table('tbl_address')
-        ->where('id', $request->id)
-        ->where('user_id', auth()->id())
-        ->update([
-            'default_address' => true
-        ]);
+            ->where('id', $request->id)
+            ->where('user_id', auth()->id())
+            ->update([
+                'default_address' => true
+            ]);
 
-        if($updateAddress){
+        if ($updateAddress) {
             return response()->json([
                 'success' => true,
                 'message' => 'Vous avez changer votre adresse par défaut',
                 'data' => $updateAddress
             ], 200);
-        }else{
+        } else {
             return response()->json([
                 'success' => false,
                 'message' => 'Echec lors du changement de l\'adresse'
             ], 400);
-        }   
+        }
     }
 
     public function editAddress(Request $request)
@@ -416,10 +408,10 @@ class UserController extends Controller
                     'updated_at'  => NOW()
                 ]);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Vous avez modifier une adresse de livraison'
-                ], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Vous avez modifier une adresse de livraison'
+            ], 200);
         } else {
             return response()->json([
                 'success' => false,
@@ -448,7 +440,7 @@ class UserController extends Controller
         ]);
 
         $request->merge([
-            'title' => '#'.rand(100000, 999999),
+            'title' => '#' . rand(100000, 999999),
             'phone' => phoneNumber($request->phone_number)
         ]);
 
@@ -521,7 +513,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'status' =>'required|string',
+            'status' => 'required|string',
             'name' =>  'string|required_without:lastname',
             'lastname' => 'string|required_without:name',
             'email' => 'email',
@@ -531,7 +523,7 @@ class UserController extends Controller
         $id = Auth::user()->id;
         $user = User::find($id);
 
-        if($request->status == 'edit_name'){
+        if ($request->status == 'edit_name') {
             $user->name = $request->name;
             $user->save();
             return response()->json([
@@ -539,7 +531,7 @@ class UserController extends Controller
                 'message' => 'Le profile a bien été mise à jour',
                 'data' => $user
             ], 200);
-        }elseif($request->status == 'edit_lastname'){
+        } elseif ($request->status == 'edit_lastname') {
             $user->lastname = $request->lastname;
             $user->save();
             return response()->json([
@@ -547,7 +539,7 @@ class UserController extends Controller
                 'message' => 'Le profile a bien été mise à jour',
                 'data' => $user
             ], 200);
-        }elseif($request->status == 'edit_email'){
+        } elseif ($request->status == 'edit_email') {
             $user->email = $request->email;
             $user->save();
             return response()->json([
@@ -555,7 +547,7 @@ class UserController extends Controller
                 'message' => 'Le profile a bien été mise à jour',
                 'data' => $user
             ], 200);
-        }elseif($request->status == 'edit_phone'){
+        } elseif ($request->status == 'edit_phone') {
             $user->phone = phoneNumber($request->phone);
             $user->save();
             return response()->json([
@@ -563,13 +555,13 @@ class UserController extends Controller
                 'message' => 'Le profile a bien été mise à jour',
                 'data' => $user
             ], 200);
-        }elseif($request->status == 'edit_password'){
+        } elseif ($request->status == 'edit_password') {
             $input = $request->except('password', 'password_confirmation');
-    
+
             if (!$request->filled('password')) {
                 $user->fill($input)->save();
             }
-            
+
             $user->password = bcrypt($request->password);
             $user->fill($input)->save();
             return response()->json([
@@ -577,7 +569,7 @@ class UserController extends Controller
                 'message' => 'Le profile a bien été mise à jour',
                 'data' => $user
             ], 200);
-        }   
+        }
 
         return response()->json([
             'success' => false,
@@ -605,7 +597,7 @@ class UserController extends Controller
         if (Auth::attempt($login)) {
             $user = Auth::user();
             $token = $user->createToken($request->get('device_name') ?? 'device_name');
- 
+
             $success['token'] =  $request->get('source') === 'app' ? $token->plainTextToken : $user->accessToken;
             //After successfull authentication, notice how I return json parameters
             return response()->json([
@@ -629,8 +621,8 @@ class UserController extends Controller
     {
         $request->validate([
             'phone' =>  'required|string',
-            'status' =>'required|string',
-            'source' =>'required|string',
+            'status' => 'required|string',
+            'source' => 'required|string',
         ]);
 
         $user = User::where([['phone', '=', request('phone')]])->first();
@@ -641,7 +633,7 @@ class UserController extends Controller
             $user = Auth::user();
 
             $token = $user->createToken($request->get('device_name') ?? 'device_name');
- 
+
             $success['token'] =  $request->get('source') === 'app' ? $token->plainTextToken : $user->accessToken;
             //User::where('phone','=', $request->phone)->update(['otp' => null]);
 
@@ -757,11 +749,11 @@ class UserController extends Controller
         $request->validate([
             'phone' => 'numeric|required_without:email|min:9',
             'email' => 'email|required_without:phone',
-            'status'=> 'present|required'
+            'status' => 'present|required'
         ]);
 
         $request->merge(['phone' => phoneNumber($request->phone)]);
-        
+
         if ($request->status == 'signUpWithEmail') {
             $user = User::where('email', $request->email)->first();
         } else if ($request->status == 'signUpWithPhone') {
@@ -799,7 +791,7 @@ class UserController extends Controller
         $request->merge([
             'phone' => phoneNumber($request->phone),
             'name' => $request->firstname,
-            'phone_verified_at'=>$request->phone_verified_at == 1 ? NOW() : null,
+            'phone_verified_at' => $request->phone_verified_at == 1 ? NOW() : null,
             'otp' => null,
             'isSeller' => $request->isSeller == 1 ? true : false,
             'registered_from' => $request->get('source'),
@@ -825,8 +817,8 @@ class UserController extends Controller
             'password.confirmed' => 'Les mot de passe ne sont pas identiques',
         ]);
 
-        
-        
+
+
         if ($request->status == 'registerWithPhone') {
 
             try {
@@ -836,12 +828,11 @@ class UserController extends Controller
                 $token = $user->createToken($request->get('device_name') ?? 'device_name');
 
                 $success['token'] =  $request->get('source') === 'app' ? $token->plainTextToken : $user->createToken($request->get('device_name') ?? 'device_name')->accessToken;
-                
+
                 $login = ['phone' => $request->get('phone'), 'password' => $request->get('password')];
                 Auth::attempt($login);
 
                 return $this->getCurrentUser($success);
-
             } catch (ServerException $e) {
                 return $e;
             }
@@ -931,17 +922,17 @@ class UserController extends Controller
             ->orderByDesc('default_address')
             ->get();
 
-       
-            return response()->json([
-                'success' => true,
-                'message' => 'User information',
-                'token' => $token ?? '',
-                'data' => $user,
-                'orders' => $orders,
-                'wishlist' => $productWishlist,
-                'address' => $defaultAddress,
-                'totalAddress' => $totalAddress
-            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User information',
+            'token' => $token ?? '',
+            'data' => $user,
+            'orders' => $orders,
+            'wishlist' => $productWishlist,
+            'address' => $defaultAddress,
+            'totalAddress' => $totalAddress
+        ]);
     }
 
     public function categories()

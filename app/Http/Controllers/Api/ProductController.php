@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Image;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\StoreResource;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -87,28 +88,37 @@ class ProductController extends Controller
      */
     public function getProductInfo(Request $request)
     {
-        $product = Product::where('id', $request->id)->first();
 
-        $rs = json_decode($product->category);
+        $request->validate([
+            "id" => "required|numeric",
+        ]);
 
-        $category = Category::whereIn('id', $rs)->get(['id','name']);
+        $product = Product::find($request->id);
 
-        $product['category'] = json_encode($category);
-
-        if ($product != null) {
-
+        if($product){
+            $rs = json_decode($product->category);
+    
+            $category = Category::whereIn('id', $rs)->get(['id', 'name']);
+    
+            $product['category'] = json_encode($category);
+    
+            if ($product != null) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $product
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'data' => []
+                ], 404);
+            }
+        }else{
             return response()->json([
-                'success' => true,
-                'data' => $product
-            ], 200);
-
-         } else {
-           return response()->json([
                 'success' => false,
                 'data' => []
             ], 404);
-         }
-          
+        }
     }
 
     /**
@@ -137,47 +147,46 @@ class ProductController extends Controller
             'category' => 'required',
         ]);
 
-
         // init
         $storeData = Profile::where('email', Auth::user()->email)
-                            ->orWhere('phone', Auth::user()->phone)
-                            ->orWhere('store_id', Auth::user()->store_id)->first();
+            ->orWhere('store_id', Auth::user()->store_id)->firstOrFail();
+
 
         $input = $request->all();
-        $images= $request->file('images') ?? [];
+        $images = $request->file('images') ?? [];
         $image = null;
         $multipleImage = [];
         $categories = [];
-        $path = public_path().'/storage/products/'.date('FY');
+        $path = public_path() . '/storage/products/' . date('FY');
 
-        if(!is_dir($path)){
+        if (!is_dir($path)) {
             mkdir($path, 0755, true);
-        }else{
-            $path = $path.'/';
+        } else {
+            $path = $path . '/';
         }
-        
+
         // return $path;
         if ($request->hasFile('image')) {
             try {
                 // //If multiples images
-                if($request->hasFile('images')) {
+                if ($request->hasFile('images')) {
 
                     $files = $request->file('images');
 
-                    foreach($files as $file) {
-                        $chemins = $file->store('products/'. date('FY'));
+                    foreach ($files as $file) {
+                        $chemins = $file->store('products/' . date('FY'));
                         $multipleImage[] = $chemins;
                     }
-                }  
+                }
 
-                $image = $request->file('image')->store('products/'. date('FY'));
+                $image = $request->file('image')->store('products/' . date('FY'));
 
                 // $categories = array_push($request->category);
 
-            //    array_push($categories, $request->category);
-            //    return $request->name;
+                //    array_push($categories, $request->category);
+                //    return $request->name;
 
-                if($storeData){
+                if ($storeData) {
                     Product::create([
                         'name' => $request->name,
                         'slug' => slugify($request->name),
@@ -191,40 +200,35 @@ class ProductController extends Controller
                         'category' => $request->category,
                         'image' => $image,
                         'images' =>  json_encode($multipleImage),
-                        'email' => $storeData->email,//store infos
-                        'store_id' => $storeData->store_id,//store infos
-                        'location' => $storeData->town,//store infos
+                        'email' => $storeData->email, //store infos
+                        'store_id' => $storeData->store_id, //store infos
+                        'location' => $storeData->town, //store infos
                     ]);
 
                     return response()->json([
-                        "success"=> true,
+                        "success" => true,
                         "message" => "Success",
                         "data" => $request->all()
                     ], 200);
                 }
-
-                
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return response()->json([
                     "success" => false,
                     "message" => $e->getMessage(),
                     "data" => $request->all()
                 ], 200);
             }
-
-
-        } 
-        
+        }
     }
 
 
     public function productReview(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'status'=> 'required',
+            'status' => 'required',
             'product_id' => 'required|numeric',
-            'review_rating'=> 'required|numeric',
-            'review'=> 'required|string|max:1000',
+            'review_rating' => 'required|numeric',
+            'review' => 'required|string|max:1000',
         ]);
 
 
@@ -233,22 +237,22 @@ class ProductController extends Controller
                 'success' => false,
                 'message' => $validator->errors()
             ], 400);
-        }else{
+        } else {
             try {
-                \DB::table('tbl_review')->insert([
-                    'status'=> $request->status,
+                DB::table('tbl_review')->insert([
+                    'status' => $request->status,
                     'review_name' => Auth::user()->name,
                     'user_id' => Auth::id(),
                     'product_id' => $request->product_id,
-                    'review_rating'=> (int) $request->review_rating,
-                    'review'=> $request->review,
-                    'created_at'=> NOW(),
-                    'updated_at'=> NOW()
-               ]);
+                    'review_rating' => (int) $request->review_rating,
+                    'review' => $request->review,
+                    'created_at' => NOW(),
+                    'updated_at' => NOW()
+                ]);
 
-                $data = \DB::table('tbl_review')->where('user_id', Auth::id())->latest()->take(1)->get();
+                $data = DB::table('tbl_review')->where('user_id', Auth::id())->latest()->take(1)->get();
 
-                foreach($data as $k => $v){
+                foreach ($data as $k => $v) {
                     $rsData[$k]['id'] = (int) $v->id;
                     $rsData[$k]['name'] = $v->review_name;
                     $rsData[$k]['date'] = date('j F Y', strtotime($v->created_at));
@@ -261,16 +265,13 @@ class ProductController extends Controller
                     'message' => 'Votre avis a été ajouter',
                     'data' => $rsData
                 ], 200);
-
-
             } catch (\Exception $e) {
-                 return response()->json([
-                'success' => false,
-                'message' => $e
-            ], 200);
+                return response()->json([
+                    'success' => false,
+                    'message' => $e
+                ], 200);
             }
         }
-
     }
 
     /**
@@ -304,9 +305,9 @@ class ProductController extends Controller
      */
     public function update(Request $request)
     {
-         $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'id' => 'required|numeric|min:1',
-         ]);
+        ]);
 
 
         if ($validator->fails()) {
@@ -314,9 +315,9 @@ class ProductController extends Controller
                 'success' => false,
                 'message' => $validator->errors()
             ], 400);
-        }else{
+        } else {
             if (Auth::user()) {
-                Product::where('id',$request->id)->update([
+                Product::where('id', $request->id)->update([
                     'featured' => 0,
                 ]);
             }

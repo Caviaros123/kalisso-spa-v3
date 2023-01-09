@@ -23,6 +23,7 @@ class StoreResource extends JsonResource
                 "description"   =>  strip_tags($this->description),
                 "location"   =>  $this->town,
                 "email"   =>  $this->email,
+                "storeId"   =>  $this->store_id,
                 "address"   =>  $this->adress,
                 "category"   =>  $this->type,
                 "created_at"   =>  $this->created_at,

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\GetLastSeen;
 use App\Http\Resources\GetAddress;
 use App\Http\Resources\GetOrderList;
+use App\Http\Resources\StoreResource;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
 use GuzzleHttp\Exception\ServerException;
@@ -159,9 +160,22 @@ class UserController extends Controller
         $store = Profile::where('email', $user->email)->orWhere('store_id', $user->store_id)->with(['products', 'user'])->first();
         $uid = Auth::id();
 
+        if (request()->has('skip') && request()->has('limit')) {
+            $products = Product::where('store_id', $store->store_id)->orderBy('id', 'desc')->skip($request->skip)->limit($request->limit)->get();
+        } else {
+            $products = Product::where('store_id', $store->store_id)->orderBy('id', 'desc')->get();
+        }
+
         // $orderProduct = OrderProduct::with('products', 'order')->get();
 
-        // return $order;
+        // $data = array(
+        //     'store' => $store,
+        //     'orders' => $orderProduct->order,
+        //     'orders_products' => $orderProduct->products,
+        //     'products' => $store->products
+        // );
+
+        // return $orderProduct;
 
         $getProductId = Product::where('store_id', $store->store_id)->orderBy('id', 'desc')->get('id');
 
@@ -196,7 +210,7 @@ class UserController extends Controller
             }
         }
 
-        foreach ($store->products as $key => $value) {
+        foreach ($products as $key => $value) {
             $product[$key]["id"] = (int) $value['id'];
             $product[$key]["name"] = $value['name'];
             $product[$key]["price"] = (float) $value['price'];

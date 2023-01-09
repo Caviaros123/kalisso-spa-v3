@@ -53,7 +53,7 @@ class StoreController extends Controller
             'founder_name' => $request->founder_name,
             'capital_price' => $request->capital_price ?? 0,
             'email' => $request->email,
-            'slug' => slugify($request->name.uniqid()),
+            'slug' => slugify($request->name . uniqid()),
         ]);
 
 
@@ -85,7 +85,7 @@ class StoreController extends Controller
                     'role_id' => 3,
                     /*'type' => $store->type,*/
                 ]);
-            } else { 
+            } else {
                 User::where('email', $store->email)->orWhere('phone', $store->phone)->update([
                     'store_id' => $store->store_id,
                     'isSeller' => 1,
@@ -190,7 +190,7 @@ class StoreController extends Controller
         if (!empty($find)) {
             return response()->json([
                 'success' => true,
-                'data' => StoreResource::collection([$find]),
+                'data' => StoreResource::collection([$find]),ù
             ], 200);
         } else {
             return response()->json([

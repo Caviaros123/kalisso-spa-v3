@@ -213,6 +213,7 @@ class ProductsController extends VoyagerBaseController
 
     public function edit(Request $request, $id)
     {
+        
 
         
         $slug = $this->getSlug($request);

@@ -181,16 +181,18 @@ class StoreController extends Controller
         $request->validate([
             'email' => 'required_without:store_id|email',
             'store_id' => 'required_without:email|string',
+            'slug' => 'required_without:email,store_id|string',
         ]);
 
         $find = Profile::where('store_id', $request->get('store_id'))
             ->orWhere('email', $request->get('email'))
+            ->orWhere('slug', $request->get('slug'))
             ->with('products')->first();
 
         if (!empty($find)) {
             return response()->json([
                 'success' => true,
-                'data' => StoreResource::collection([$find]),ù
+                'data' => StoreResource::collection([$find]),
             ], 200);
         } else {
             return response()->json([

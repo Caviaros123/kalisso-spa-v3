@@ -11,7 +11,7 @@ export NVM_DIR="$HOME/.nvm"
 nvm install --lts
 npm cache clean --force
 
-cd domains/kalisso.com/kalisso
+cd domains/kalisso.com/kalisso 
 npm cache clean --force
 npm ci && npm run prod
 

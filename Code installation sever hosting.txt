@@ -25,3 +25,8 @@ if error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (er
 git config --global http.version HTTP/1.1
 git push 
 git config --global http.version HTTP/2
+
+//export db using command line 
+mysqldump -u u687701022_kalisso -p u687701022_kalisso_db > dbexport.sql
+
+

@@ -71,9 +71,7 @@ Route::get("/reset-password/{token}", "Api\AuthController@resetPassord")->middle
 Route::get("redirect/{provider}", "Api\SocialiteController@redirect")->name('socialite.redirect');
 Route::get("callback/{provider}", "Api\SocialiteController@callback")->name('socialite.callback');
 
-// 	// EXPORT CSV FROM DB
-Route::get('/tasks/members', 'TaskController@exportCsv');
-Route::get('/tasks/products', 'TaskController@exportCsvProducts');
+
 
 //payment callback
 Route::get('/payment/callback', 'Api\PaymentController@callback');
@@ -88,8 +86,8 @@ Route::any('/{vue_capture}', function () {
     ->where('vue_capture', '^(?!resend/verification-email).*$')
     ->where('vue_capture', '^(?!broadcasting).*$')
     ->where('vue_capture', '^(?!laravel-websockets).*$')
-    ->where('vue_capture', '^(?!tasks/members).*$')
-    ->where('vue_capture', '^(?!tasks/products).*$')
+    // ->where('vue_capture', '^(?!tasks/members).*$')
+    // ->where('vue_capture', '^(?!tasks/products).*$')
     ->where('vue_capture', '^(?!payment/callback).*$')
     ->where('vue_capture', '^(?!notify).*$');
 

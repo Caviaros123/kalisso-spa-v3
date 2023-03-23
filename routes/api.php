@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Broadcast;
 use TCG\Voyager\Facades\Voyager;
+use Illuminate\Support\Facades\Auth;
 
 
 /*
@@ -163,5 +164,11 @@ Route::group(['prefix' => 'v1'], function () {
         // /account/user/store/plan/subscription
         Route::post('/account/user/store/plan/subscription', 'Api\StoreController@checkoutPlanSubscription');
         Route::post('create/new/store', 'Api\StoreController@createStore');
+
+        // 	// EXPORT CSV FROM DB
+        if(Auth::id() == 1){
+            Route::get('/tasks/members', 'TaskController@exportCsv');
+            Route::get('/tasks/products', 'TaskController@exportCsvProducts');
+        }
     });
 });

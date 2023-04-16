@@ -158,6 +158,39 @@ class UserController extends Controller
     }
 
 
+    public function deleteAccount(Request $request) {
+        // send Email to admin to delete account
+        $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Email or Password',
+            ], 401);
+        }
+
+        try {
+          // Event (new DeleteAccount($user));
+          Auth::logout();
+
+          $user->disabled = true;
+          $user->save();
+
+          return response()->json([
+              'success' => true,
+              'message' => 'Account deleted successfully',
+          ], 200);
+        } catch (\Throwable $th) {
+              return response()->json([
+              'success' => false,
+              'message' => 'Invalid Email or Password '.$th,
+          ], 401);
+        }
+    }
 
     /**
      * Register api.

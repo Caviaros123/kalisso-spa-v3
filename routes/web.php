@@ -27,9 +27,10 @@ use Illuminate\Support\Facades\Password;
 |
 */
 // Auth::routes();
+Auth::routes();
 
 // voyager route
-Auth::routes();
+
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });

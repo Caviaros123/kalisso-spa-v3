@@ -164,6 +164,7 @@ Route::group(['prefix' => 'v1'], function () {
         // /account/user/store/plan/subscription
         Route::post('/account/user/store/plan/subscription', 'Api\StoreController@checkoutPlanSubscription');
         Route::post('create/new/store', 'Api\StoreController@createStore');
+        Route::post('delete-account', 'Api\UserController@deleteAccount');
 
         // 	// EXPORT CSV FROM DB
         if(Auth::id() == 1){
